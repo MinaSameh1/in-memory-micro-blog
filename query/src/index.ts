@@ -88,7 +88,7 @@ app.post(
         return res.status(201).json({ message: "Comment created" });
       }
       default:
-        return res.status(400).json({ message: "Invalid event" });
+        return res.status(200).json({ message: "Event not handled" });
     }
   }
 );
