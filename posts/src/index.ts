@@ -1,6 +1,7 @@
-import express from "express";
+import axios from "axios";
 import cors from "cors";
 import { randomBytes } from "crypto";
+import express from "express";
 
 interface Post {
   id: string;
@@ -62,7 +63,16 @@ app.post("/posts", (req, res) => {
   const id = randomBytes(4).toString("hex");
   const post = { id, title };
   posts.push(post);
+  axios.post("http://localhost:4005/events", {
+    type: "PostCreated",
+    data: post,
+  });
   res.status(201).send(post);
+});
+
+app.post("/events", (req, res) => {
+  console.log("Received Event", req.body.type);
+  return res.status(201).send([]);
 });
 
 app.use(

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { Comment } from "../../types";
 
 interface Post {
   id: string;
   title: string;
+  comments: Comment[];
 }
 
 export default function usePostsList() {
@@ -15,7 +17,7 @@ export default function usePostsList() {
     const { signal } = controller.current;
     const fetchPosts = () => {
       setLoading(true);
-      fetch("http://localhost:4000/posts", {
+      fetch("http://localhost:4002/posts", {
         signal,
       })
         .then((res) => {

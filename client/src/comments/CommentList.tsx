@@ -1,32 +1,17 @@
-import useComments from "./hooks/useComments";
+import { Comment } from "../types";
 
 interface Props {
-  postId: string;
+  comments: Comment[];
 }
 
-export default function CommentList({ postId }: Props) {
-  const {
-    comments,
-    refresh,
-    loading,
-    cancel
-  } = useComments(postId);
-
+export default function CommentList({ comments }: Props) {
   return (
     <>
-      <button onClick={refresh}>Refresh</button>
-      {loading ? (
-        <div>
-          <button onClick={cancel}>Cancel</button>
-          <span>Loading...</span>
-        </div>
-      ) : (
-        <ul>
-          {comments.map((comment) => (
-            <li key={comment.id}>{comment.content}</li>
-          ))}
-        </ul>
-      )}
+      <ul>
+        {comments.map((comment) => (
+          <li key={comment.id}>{comment.content}</li>
+        ))}
+      </ul>
     </>
-  )
+  );
 }

@@ -1,6 +1,7 @@
-import express from "express";
+import axios from "axios";
 import cors from "cors";
 import { randomBytes } from "crypto";
+import express from "express";
 
 interface Comment {
   id: string;
@@ -8,9 +9,7 @@ interface Comment {
 }
 
 const commentsByPostId: { [key: string]: Comment[] } = {
-  "b76d1a6a": [
-    { id: "1", content: "This is a comment!" },
-  ]
+  b76d1a6a: [{ id: "a6fbc9f2", content: "This is a comment!" }],
 };
 
 const app = express();
@@ -45,7 +44,22 @@ app.post("/posts/:id/comments", (req, res) => {
   const commentId = randomBytes(4).toString("hex");
   const comments = commentsByPostId[req.params.id] || [];
   commentsByPostId[req.params.id] = [...comments, { id: commentId, content }];
+
+  axios.post("http://localhost:4005/events", {
+    type: "CommentCreated",
+    data: {
+      id: commentId,
+      content,
+      postId: req.params.id,
+    },
+  });
+
   res.status(201).send(commentsByPostId[req.params.id]);
+});
+
+app.post("/events", (req, res) => {
+  console.log("Received Event", req.body.type);
+  return res.status(201).send([]);
 });
 
 app.use(
