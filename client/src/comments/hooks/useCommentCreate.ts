@@ -22,7 +22,7 @@ export default function useCommentCreate(postId: string) {
       }
       return await res.json();
     } catch (err) {
-      return console.log(err);
+      return console.error(err);
     }
   };
 

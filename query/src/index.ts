@@ -4,14 +4,20 @@ import express from "express";
 interface Posts {
   id: string;
   title: string;
-  comments: Array<{ id: string; content: string }>;
+  comments: Array<{
+    id: string;
+    content: string;
+    status: "approved" | "pending" | "rejected";
+  }>;
 }
 
 const Posts: Array<Posts> = [
   {
     id: "b76d1a6a",
     title: "test",
-    comments: [{ id: "a6fbc9f2", content: "This is a comment!" }],
+    comments: [
+      { id: "a6fbc9f2", content: "This is a comment!", status: "approved" },
+    ],
   },
 ];
 
@@ -60,6 +66,15 @@ app.post(
             postId: string;
           };
         }
+      | {
+          type: "CommentUpdated";
+          data: {
+            id: string;
+            postId: string;
+            content: string;
+            status: "approved" | "pending" | "rejected";
+          };
+        }
     >,
     res
   ) => {
@@ -84,8 +99,22 @@ app.post(
         if (!post) {
           return res.status(400).json({ message: "Post not found" });
         }
-        post.comments.push({ id, content });
+        post.comments.push({ id, content, status: "pending" });
         return res.status(201).json({ message: "Comment created" });
+      }
+      case "CommentUpdated": {
+        const { id, postId, content, status } = event.data;
+        const post = Posts.find((post) => post.id === postId);
+        if (!post) {
+          return res.status(400).json({ message: "Post not found" });
+        }
+        const comment = post.comments.find((comment) => comment.id === id);
+        if (!comment) {
+          return res.status(400).json({ message: "Comment not found" });
+        }
+        comment.status = status;
+        comment.content = content;
+        return res.status(201).json({ message: "Comment moderated" });
       }
       default:
         return res.status(200).json({ message: "Event not handled" });
@@ -101,13 +130,26 @@ app.use(
     err: unknown,
     _req: express.Request,
     res: express.Response,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _next: express.NextFunction
   ) => {
-    console.log(err);
+    console.error(err);
     return res.status(500).send("Something broke!");
   }
 );
 
 app.listen(4002, () => {
   console.log("Listening on port 4002");
+});
+
+process.on("uncaughtException", (err) => {
+  console.error(err);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error(err);
+});
+
+process.on("SIGINT", () => {
+  process.exit(0);
 });

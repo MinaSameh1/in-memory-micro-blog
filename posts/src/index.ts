@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import cors from "cors";
 import { randomBytes } from "crypto";
 import express from "express";
@@ -82,11 +82,26 @@ app.use(
     res: express.Response,
     _next: express.NextFunction
   ) => {
-    console.log(err);
+    if (err instanceof AxiosError)
+      console.error(err.response?.data || err.response?.statusText);
+    else console.error(err);
+
     return res.status(500).send("Something broke!");
   }
 );
 
 app.listen(4000, () => {
   console.log("Listening on port 4000");
+});
+
+process.on("uncaughtException", (err) => {
+  console.error(err);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error(err);
+});
+
+process.on("SIGINT", () => {
+  process.exit(0);
 });

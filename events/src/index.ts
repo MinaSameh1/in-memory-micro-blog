@@ -1,6 +1,5 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import cors from "cors";
-import { randomBytes } from "crypto";
 import express from "express";
 
 const app = express();
@@ -27,7 +26,7 @@ app.get("/ping", (_, res) => {
   res.send("pong from events");
 });
 
-app.post("/events", (req, res, next) => {
+app.post("/events", async (req, res, next) => {
   const event = req.body;
   if (!event?.type || !event?.data) {
     return res.status(400).json({ message: "Invalid event" });
@@ -36,22 +35,28 @@ app.post("/events", (req, res, next) => {
   const cancelToken = axios.CancelToken;
   // abort early if event is not valid
   try {
-    axios.post("http://localhost:4000/events", event, {
+    console.count("events");
+    await axios.post("http://localhost:4000/events", event, {
       cancelToken: cancelToken.source().token,
     });
-    axios.post("http://localhost:4001/events", event, {
+    console.count("events");
+    await axios.post("http://localhost:4001/events", event, {
       cancelToken: cancelToken.source().token,
     });
-    axios.post("http://localhost:4002/events", event, {
+    console.count("events");
+    await axios.post("http://localhost:4002/events", event, {
       cancelToken: cancelToken.source().token,
     });
-  } catch (err) {
-    console.error(err);
-    cancelToken.source().cancel();
-    next(err);
-  }
+    console.count("events");
+    await axios.post("http://localhost:4003/events", event, {
+      cancelToken: cancelToken.source().token,
+    });
 
-  res.send({ status: "OK" });
+    return res.send({ status: "OK" });
+  } catch (err) {
+    cancelToken.source().cancel();
+    return next(err);
+  }
 });
 
 app.use(
@@ -62,11 +67,25 @@ app.use(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _next: express.NextFunction
   ) => {
-    console.log(err);
+    if (err instanceof AxiosError)
+      console.error(err.response?.data || err.response?.statusText);
+    else console.error(err);
     return res.status(500).send("Something broke!");
   }
 );
 
 app.listen(4005, () => {
   console.log("Listening on port 4005");
+});
+
+process.on("uncaughtException", (err) => {
+  console.error(err);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error(err);
+});
+
+process.on("SIGINT", () => {
+  process.exit(0);
 });
