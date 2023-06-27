@@ -1,8 +1,10 @@
-# React Comments App
+# Microservices Simple Blog App
 
-This is a simple full stack micro services app that I used to learn about microservices.
+This is a simple full stack micro services app that I used to learn about microservices, sharing data etc.
 
-Currently all dbs of the services are in memory structures, I also created a simple Event Bus from scratch to learn more about it.
+Currently all dbs of the services are in memory structures, I wanted to focus more on the stucture instead of having to worry about DBs connections etc. 
+
+I also created a simple Event Bus from scratch to learn more about it.
 
 ### References
 
