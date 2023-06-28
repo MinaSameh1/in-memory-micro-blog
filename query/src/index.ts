@@ -1,3 +1,4 @@
+import axios from "axios";
 import cors from "cors";
 import express from "express";
 
@@ -11,16 +12,74 @@ interface Posts {
   }>;
 }
 
-const Posts: Array<Posts> = [
-  {
-    id: "b76d1a6a",
-    title: "test",
-    comments: [
-      { id: "a6fbc9f2", content: "This is a comment!", status: "approved" },
-    ],
-  },
-];
+const Posts: Array<Posts> = [];
 
+function handleEvent({
+  type,
+  data,
+}:
+  | {
+      type: "PostCreated";
+      data: {
+        id: string;
+        title: string;
+      };
+    }
+  | {
+      type: "CommentCreated";
+      data: {
+        id: string;
+        content: string;
+        postId: string;
+        status: "approved" | "pending" | "rejected";
+      };
+    }
+  | {
+      type: "CommentUpdated";
+      data: {
+        id: string;
+        postId: string;
+        content: string;
+        status: "approved" | "pending" | "rejected";
+      };
+    }) {
+  switch (type) {
+    case "PostCreated": {
+      const { id, title } = data;
+      Posts.push({
+        id,
+        title,
+        comments: [],
+      });
+      return "Post created";
+    }
+    case "CommentCreated": {
+      const { id, content, postId, status } = data;
+      const post = Posts.find((post) => post.id === postId);
+      if (!post) {
+        throw new Error("Post not found");
+      }
+      post.comments.push({ id, content, status });
+      return "Comment created";
+    }
+    case "CommentUpdated": {
+      const { id, postId, content, status } = data;
+      const post = Posts.find((post) => post.id === postId);
+      if (!post) {
+        throw new Error("Post not found");
+      }
+      const comment = post.comments.find((comment) => comment.id === id);
+      if (!comment) {
+        throw new Error("Comment not found");
+      }
+      comment.status = status;
+      comment.content = content;
+      return "Comment updated";
+    }
+    default:
+      return "Event not handled";
+  }
+}
 const app = express();
 app.use(
   cors({
@@ -45,82 +104,14 @@ app.get("/posts", (_, res) => {
   res.send(Posts);
 });
 
-app.post(
-  "/events",
-  (
-    req: express.Request<
-      unknown,
-      unknown,
-      | {
-          type: "PostCreated";
-          data: {
-            id: string;
-            title: string;
-          };
-        }
-      | {
-          type: "CommentCreated";
-          data: {
-            id: string;
-            content: string;
-            postId: string;
-          };
-        }
-      | {
-          type: "CommentUpdated";
-          data: {
-            id: string;
-            postId: string;
-            content: string;
-            status: "approved" | "pending" | "rejected";
-          };
-        }
-    >,
-    res
-  ) => {
-    const event = req.body;
-    if (!event?.type || !event?.data) {
-      return res.status(400).json({ message: "Invalid event" });
-    }
-
-    switch (event.type) {
-      case "PostCreated": {
-        const { id, title } = event.data;
-        Posts.push({
-          id,
-          title,
-          comments: [],
-        });
-        return res.status(201).json({ message: "Post created" });
-      }
-      case "CommentCreated": {
-        const { id, content, postId } = event.data;
-        const post = Posts.find((post) => post.id === postId);
-        if (!post) {
-          return res.status(400).json({ message: "Post not found" });
-        }
-        post.comments.push({ id, content, status: "pending" });
-        return res.status(201).json({ message: "Comment created" });
-      }
-      case "CommentUpdated": {
-        const { id, postId, content, status } = event.data;
-        const post = Posts.find((post) => post.id === postId);
-        if (!post) {
-          return res.status(400).json({ message: "Post not found" });
-        }
-        const comment = post.comments.find((comment) => comment.id === id);
-        if (!comment) {
-          return res.status(400).json({ message: "Comment not found" });
-        }
-        comment.status = status;
-        comment.content = content;
-        return res.status(201).json({ message: "Comment moderated" });
-      }
-      default:
-        return res.status(200).json({ message: "Event not handled" });
-    }
+app.post("/events", (req, res) => {
+  const event = req.body;
+  if (!event?.type || !event?.data) {
+    return res.status(400).json({ message: "Invalid event" });
   }
-);
+  handleEvent(event);
+  res.send({ message: "Event received" });
+});
 
 app.get("/ping", (_, res) => {
   res.send("pong from posts");
@@ -138,8 +129,12 @@ app.use(
   }
 );
 
-app.listen(4002, () => {
+app.listen(4002, async () => {
   console.log("Listening on port 4002");
+  const res = await axios.get("http://localhost:4005/events");
+  for (const event of res.data) {
+    handleEvent(event);
+  }
 });
 
 process.on("uncaughtException", (err) => {

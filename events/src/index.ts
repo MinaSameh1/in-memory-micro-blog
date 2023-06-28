@@ -2,6 +2,30 @@ import axios, { AxiosError } from "axios";
 import cors from "cors";
 import express from "express";
 
+interface Event {
+  type: string;
+  data: unknown;
+}
+
+const events: Event[] = [
+  {
+    type: "PostCreated",
+    data: {
+      id: "b76d1a6a",
+      title: "test",
+    },
+  },
+  {
+    type: "CommentCreated",
+    data: {
+      id: "a6fbc9f2",
+      content: "This is a comment!",
+      postId: "b76d1a6a",
+      status: "approved",
+    },
+  }
+];
+
 const app = express();
 app.use(
   cors({
@@ -26,11 +50,19 @@ app.get("/ping", (_, res) => {
   res.send("pong from events");
 });
 
+app.get("/events", (req, res) => {
+  if (req.query?.type) {
+    return res.send(events.filter((e) => e.type === req.query.type));
+  }
+  res.send(events);
+});
+
 app.post("/events", async (req, res, next) => {
   const event = req.body;
   if (!event?.type || !event?.data) {
     return res.status(400).json({ message: "Invalid event" });
   }
+  events.push(event);
 
   const cancelToken = axios.CancelToken;
   // abort early if event is not valid
