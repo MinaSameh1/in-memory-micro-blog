@@ -23,7 +23,7 @@ const events: Event[] = [
       postId: "b76d1a6a",
       status: "approved",
     },
-  }
+  },
 ];
 
 const app = express();
@@ -64,6 +64,7 @@ app.post("/events", async (req, res, next) => {
   }
   events.push(event);
 
+  console.log(event.type);
   const cancelToken = axios.CancelToken;
   // abort early if event is not valid
   try {

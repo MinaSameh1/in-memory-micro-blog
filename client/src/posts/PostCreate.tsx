@@ -5,11 +5,13 @@ export default function PostsCreate() {
 
   return (
     <div>
-      <div className="form-group">
-        <label htmlFor="title">Title</label>
+      <div className="mb-4">
+        <label htmlFor="title" className="block text-gray-700 font-bold mb-2">
+          Title
+        </label>
         <input
           type="text"
-          className="form-control"
+          className="border border-gray-400 py-2 px-4 rounded-lg w-full"
           id="title"
           value={title}
           onChange={(e) => setInput(e.target.value)}
@@ -17,7 +19,7 @@ export default function PostsCreate() {
       </div>
       <button
         type="submit"
-        className="btn btn-primary"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         onClick={() => {
           handleSubmit();
         }}

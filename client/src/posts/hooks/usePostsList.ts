@@ -37,9 +37,10 @@ export default function usePostsList() {
         });
     };
     fetchPosts();
-    // return () => {
-    //   controller.current.abort();
-    // };
+    return () => {
+      controller.current.abort();
+      controller.current = new AbortController();
+    };
   }, [update, controller]);
 
   const refresh = () => setUpdate((prev) => !prev);

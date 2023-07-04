@@ -4,7 +4,7 @@ import PostsList from "./posts/PostList";
 function App() {
   return (
     <>
-      <div className="container">
+      <div className="container mx-auto px-4">
         <h1>Create Post</h1>
         <PostsCreate />
         <br />
