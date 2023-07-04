@@ -17,7 +17,7 @@ export default function usePostsList() {
     const { signal } = controller.current;
     const fetchPosts = () => {
       setLoading(true);
-      fetch("http://localhost:4002/posts", {
+      fetch(import.meta.env.VITE_QUERY_URL + "/posts", {
         signal,
       })
         .then((res) => {

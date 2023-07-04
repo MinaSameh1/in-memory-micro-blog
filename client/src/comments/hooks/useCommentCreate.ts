@@ -2,11 +2,12 @@ import { useState } from "react";
 
 export default function useCommentCreate(postId: string) {
   const [content, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const addComment = async () => {
     try {
       const res = await fetch(
-        `http://localhost:4001/posts/${postId}/comments`,
+        `${import.meta.env.VITE_COMMENTS_URL}/posts/${postId}/comments`,
         {
           method: "POST",
           headers: {
@@ -27,14 +28,22 @@ export default function useCommentCreate(postId: string) {
   };
 
   const handleSubmit = () => {
+    setLoading(true);
     if (content.length > 0) {
-      const items = addComment().then(() => {
-        // Only on success
-        setInput("");
-      });
+      const items = addComment()
+        .then(() => {
+          // Only on success
+          setInput("");
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setLoading(false);
+        });
       return items;
     }
+    setLoading(false);
     return false;
   };
-  return { handleSubmit, content, setInput };
+  return { handleSubmit, content, setInput, loading };
 }

@@ -9,7 +9,7 @@ export default function PostsList() {
       <div className="container">
         <button
           onClick={refresh}
-          className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"
+          className="rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-600"
         >
           Refresh
         </button>
@@ -17,12 +17,12 @@ export default function PostsList() {
           <div>
             <button
               onClick={cancel}
-              className="mt-6 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"
+              className="mt-6 rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-600"
             >
               Cancel
             </button>
-            <div className="flex justify-center items-center">
-              <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+            <div className="flex items-center justify-center">
+              <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-gray-900"></div>
             </div>
           </div>
         ) : (
@@ -30,10 +30,12 @@ export default function PostsList() {
             {posts.map((post) => (
               <div
                 key={post.id}
-                className="bg-white p-6 w-1/4 shadow-lg rounded-lg m-4"
+                className="m-4 w-1/4 rounded-lg bg-white p-6 shadow-lg"
               >
                 <div className="p-1">
-                  <h3>{post.title}</h3>
+                  <div className="truncate whitespace-nowrap text-2xl font-bold text-gray-700">
+                    {post.title}
+                  </div>
                   <CommentList comments={post.comments} />
                   <hr className="m-4" />
                   <CommentCreate postId={post.id} />
