@@ -28,4 +28,4 @@ Don't forget to start minikube using `minikube start`
 
 ## More Specific ones
 
-- kubectl rollout restart deployment posts-depl - Used to update the deployment
+- kubectl rollout restart deployment depname - Used to update the deployment
