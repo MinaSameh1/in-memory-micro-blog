@@ -4,6 +4,9 @@ This is some personal notes I wrote for kubernates.
 
 ## General Comments
 
+- Pods - The smallest deployable units that one can manage in kubernetes.
+- Deployments - They provide declarative updates and ensures that a specified number of replicas are always running.
+- Replicasets - Ensures that a specified number of replicas of a pod are running at any given time, manages lifecycle of pods.
 - Services - Provide networking between pods, they are split into 4, mostly the first 2 are used.
   1. Cluter IP - Sets a url to access a pod, only exposes pods in the cluster.
   1. Load Balancer - Makes a pod accessible from outside, this is the right way to expose a pod to the outside world.
