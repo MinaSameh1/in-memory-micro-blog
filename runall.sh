@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# minikube start
+
 tmux new-session -d -s "runall" \
   "fish -c 'cd client && yarn start; exec fish'" \; \
   rename-window "client" \; \
